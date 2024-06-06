@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/csv"
-	"fmt"
 	"github.com/otiai10/gosseract/v2"
 	"log"
 	"os"
@@ -36,7 +35,6 @@ func main() {
 	}
 
 	text, _ := client.Text()
-	fmt.Println(text)
 	chunks := strings.Split(text, "\n")
 
 	var validLines []string
