@@ -16,6 +16,10 @@ import (
 var validExt = []string{".jpg", ".jpeg", ".png"}
 
 func main() {
+	if len(os.Args) < 2 {
+		log.Fatal("Please specify the path to the image: grabenah ~/Downloads/grab.jpeg")
+	}
+
 	imgPath := os.Args[1]
 
 	if !slices.Contains(validExt, filepath.Ext(imgPath)) {
