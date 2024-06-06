@@ -6,15 +6,26 @@ import (
 	"github.com/otiai10/gosseract/v2"
 	"log"
 	"os"
+	"path"
+	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 )
 
+var validExt = []string{".jpg", ".jpeg", ".png"}
+
 func main() {
+	imgPath := os.Args[1]
+
+	if !slices.Contains(validExt, filepath.Ext(imgPath)) {
+		log.Fatal("File is not a valid image")
+	}
+
 	client := gosseract.NewClient()
 	defer client.Close()
 
-	err := client.SetImage("./test/sample-3.jpeg")
+	err := client.SetImage(imgPath)
 
 	if err != nil {
 		log.Fatal("Image is not valid")
@@ -49,7 +60,20 @@ func main() {
 	}
 
 	// We save to csv
-	file, err := os.Create("result.csv")
+	outputPath := "./"
+	if len(os.Args) > 2 {
+		outputPath = os.Args[2]
+	}
+
+	outputPath, filename := path.Split(outputPath)
+	ext := path.Ext(filename)
+
+	if filename == "" || ext == "" {
+		outputPath = path.Join(outputPath, filename)
+		filename = "result.csv"
+	}
+
+	file, err := os.Create(path.Join(outputPath, filename))
 	if err != nil {
 		log.Fatal("Failed to create file")
 	}
