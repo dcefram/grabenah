@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"fmt"
 	"github.com/otiai10/gosseract/v2"
 	"log"
 	"os"
@@ -13,20 +14,20 @@ func main() {
 	client := gosseract.NewClient()
 	defer client.Close()
 
-	err := client.SetImage("./test/sample-2.jpeg")
+	err := client.SetImage("./test/sample-3.jpeg")
 
 	if err != nil {
 		log.Fatal("Image is not valid")
 	}
 
 	text, _ := client.Text()
-
+	fmt.Println(text)
 	chunks := strings.Split(text, "\n")
 
 	var validLines []string
 	var foundHeader bool
 	for _, line := range chunks {
-		if line == "" || strings.Contains(line, "Rate") {
+		if line == "" || strings.Contains(line, "Rate") || strings.Contains(line, "Reorder") || strings.Contains(line, "= =") || strings.Contains(line, "—_—") {
 			continue
 		}
 
@@ -41,7 +42,7 @@ func main() {
 	}
 
 	// For each valid line, we can assume that the expression idx+1 % 2 should give us an idea which are pairs
-	var pairs [][]string
+	pairs := [][]string{{"Date", "Name", "Price"}}
 	for idx := 0; idx < len(validLines)/2; idx++ {
 		realIdx := idx * 2
 		name, price := getNameAndPrice(validLines[realIdx])
@@ -63,7 +64,7 @@ func main() {
 }
 
 func getDate(str string) string {
-	re, err := regexp.Compile("([a-zA-Z]+\\s\\d{4})")
+	re, err := regexp.Compile("((\\d+\\s)?[a-zA-Z]+\\s\\d{4})")
 	if err != nil {
 		return ""
 	}
@@ -72,7 +73,7 @@ func getDate(str string) string {
 
 func getNameAndPrice(str string) (string, string) {
 	// We strip the known artifacts resulting from the icons prefixed in grab screenshots
-	re, err := regexp.Compile("^(fs|fe\\.)\\s([\\S\\s]+)\\s[pP#]?(\\d+\\.\\d{2})")
+	re, err := regexp.Compile("^(fs|fe|fe\\.)\\s([\\S\\s]+)\\s([pP#]|\\*\\?)?([\\d,]+\\.\\d{2})")
 	if err != nil {
 		return str, "0"
 	}
@@ -83,5 +84,7 @@ func getNameAndPrice(str string) (string, string) {
 		return str, "0"
 	}
 
-	return m[2], m[3]
+	p := strings.ReplaceAll(m[4], ",", "")
+
+	return m[2], p
 }
