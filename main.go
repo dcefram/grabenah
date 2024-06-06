@@ -41,7 +41,6 @@ func main() {
 		}
 	}
 
-	// For each valid line, we can assume that the expression idx+1 % 2 should give us an idea which are pairs
 	pairs := [][]string{{"Date", "Name", "Price"}}
 	for idx := 0; idx < len(validLines)/2; idx++ {
 		realIdx := idx * 2
