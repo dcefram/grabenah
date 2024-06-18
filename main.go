@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/csv"
-	"github.com/otiai10/gosseract/v2"
+	"fmt"
 	"log"
 	"os"
 	"path"
@@ -10,6 +10,8 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/otiai10/gosseract/v2"
 )
 
 var validExt = []string{".jpg", ".jpeg", ".png"}
@@ -40,7 +42,7 @@ func main() {
 	var validLines []string
 	var foundHeader bool
 	for _, line := range chunks {
-		if line == "" || strings.Contains(line, "Rate") || strings.Contains(line, "Reorder") || strings.Contains(line, "= =") || strings.Contains(line, "—_—") {
+		if line == "" || stringContains([]string{"Rate", "Reorder", "= =", "—_—"}, line) {
 			continue
 		}
 
@@ -53,7 +55,7 @@ func main() {
 			foundHeader = true
 		}
 	}
-
+	fmt.Printf("%s", validLines)
 	pairs := [][]string{{"Date", "Name", "Price"}}
 	for idx := 0; idx < len(validLines)/2; idx++ {
 		realIdx := idx * 2
@@ -112,4 +114,14 @@ func getNameAndPrice(str string) (string, string) {
 	p := strings.ReplaceAll(m[4], ",", "")
 
 	return m[2], p
+}
+
+func stringContains(keys []string, str string) bool {
+	for _, key := range keys {
+		if strings.Contains(str, key) {
+			return true
+		}
+	}
+
+	return false
 }
